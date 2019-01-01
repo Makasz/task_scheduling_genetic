@@ -59,7 +59,6 @@ class GeneticScheduler:
             self.gen_zero.append(ns.copy())
 
     def crossover(self, s1, s2):
-
         ns = [{'id': -1} for _ in range(20)]
         s1_indexes = (randint(0, self.n/2-1), randint(self.n/2-1, self.n-1))
         ns[s1_indexes[0]:s1_indexes[1]] = s1[s1_indexes[0]:s1_indexes[1]]
@@ -82,9 +81,7 @@ class GeneticScheduler:
         for index, task_id in zip(index_to_fill, missing_tasks):
             ns[index] = [t for t in s1 if t['id'] == task_id][0]
         print('Crossover result::', ', '.join([str(task['id']) for task in ns]))
-
         return ns
-
 
 
     def run(self):
@@ -92,7 +89,7 @@ class GeneticScheduler:
         for entity in self.gen_zero:
             penalty = self.calculate_penalties(entity, self.start_time_line)
             print(', '.join([str(task['id']) for task in entity]), penalty)
-        self.crossover(self.gen_zero[0], self.gen_zero[1])
+        self.crossover(self.gen_zero[0], self.gen_zero[1])  # Crossover 2 initial solutions
 
 
 
