@@ -4,7 +4,7 @@ from numpy import sum, floor
 
 
 def get_results_list():
-    return [file for file in glob('results/sch[0-9]*_[0-9]*_[2468].txt')]
+    return [file for file in glob('results/sch[0-9]*_[0-9]*_[2468]*')]
 
 
 class Checker:
@@ -38,7 +38,7 @@ class Checker:
     def check_file(self, name):
         print(f'Validate file {name}')
         # Replace file's name and split to variables
-        variables = name.replace('results/sch', '').replace('.txt', '').split('_')
+        variables = name.replace('results\\sch', '').replace('.txt', '').split('_')
         n_in_name = int(variables[0])
         k_in_name = int(variables[1])
         h_in_name = int(variables[2]) / 10

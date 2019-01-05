@@ -113,10 +113,12 @@ class Scheduler:
         total = time() - start
         print(f'{total * 1000}'.replace('.', ','))
 
-        self.write_to_file(best_scheduled, start_time_line, goal_value)
+        self.write_to_file(best_scheduled, start_time_line, goal_value, "heur")
 
         genSchd = GeneticScheduler(self.n, self.k, self.h, self.original_tasks, self.tasks_processing_time, self.due_date, best_scheduled, goal_value, start_time_line)
-        genSchd.run()
+        best_scheduled, best_penlaty = genSchd.run()
+
+        self.write_to_file(best_scheduled, start_time_line, best_penlaty, "gen")
 
     def read_tasks(self):
         path = f'source/sch{self.n}.txt'
@@ -148,8 +150,8 @@ class Scheduler:
                 'b_ratio': val[2] / val[0]
                 })
 
-    def write_to_file(self, tasks, start, goal_value):
-        path = f'results/sch{self.n}_{self.k}_{int(self.h * 10)}.txt'
+    def write_to_file(self, tasks, start, goal_value, t):
+        path = f'results/sch{self.n}_{self.k}_{int(self.h * 10)}_{t}.txt'
         with open(path, 'w') as stream:
             writeln(stream, int(self.h * 10))
             writeln(stream, goal_value)
