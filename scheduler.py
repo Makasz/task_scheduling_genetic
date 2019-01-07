@@ -4,6 +4,7 @@ from time import time
 from operator import itemgetter
 from numpy import sum, floor, delete
 from genetic_1 import GeneticScheduler
+import genetic_2_jit as gen
 
 
 def writeln(stream, content):
@@ -12,10 +13,10 @@ def writeln(stream, content):
 
 
 class Scheduler:
-    def __init__(self):
-        self.n = None
-        self.k = None
-        self.h = None
+    def __init__(self, n=None, k=None, h=None):
+        self.n = n
+        self.k = k
+        self.h = h
         self.original_tasks = []
         self.tasks_processing_time = None
         self.due_date = None
@@ -111,14 +112,18 @@ class Scheduler:
         start = time()
         best_scheduled, goal_value, start_time_line = self.shedule_shift_and_verify()
         total = time() - start
-        print(f'{total * 1000}'.replace('.', ','))
+        # print(f'{total * 1000}'.replace('.', ','))
 
         self.write_to_file(best_scheduled, start_time_line, goal_value, "heur")
 
-        genSchd = GeneticScheduler(self.n, self.k, self.h, self.original_tasks, self.tasks_processing_time, self.due_date, best_scheduled, goal_value, start_time_line)
-        best_scheduled, best_penlaty = genSchd.run()
+        # genSchd = GeneticScheduler(self.n, self.k, self.h, self.original_tasks, self.tasks_processing_time, self.due_date, best_scheduled, goal_value, start_time_line)
+        # best_penlaty, best_scheduled = genSchd.run()
+
+        best_penlaty, best_scheduled = gen.run(self.n, self.k, self.h, self.original_tasks, self.tasks_processing_time, self.due_date, best_scheduled, goal_value, start_time_line)
 
         self.write_to_file(best_scheduled, start_time_line, best_penlaty, "gen")
+
+        return best_penlaty
 
     def read_tasks(self):
         path = f'source/sch{self.n}.txt'

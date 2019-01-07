@@ -1,5 +1,6 @@
 from random import randint
 import math
+from numba import jit
 
 class GeneticScheduler:
     def __init__(self, n, k, h, ot, tpt, dd, bs, gv, stl):
@@ -14,10 +15,10 @@ class GeneticScheduler:
         self.start_time_line = stl
         self.gen_zero = []
         self.population = 100  # Must be x * 4
-        self.mutation_rate = 0.2
+        self.mutation_rate = 0.1
         self.mutation_rate_percent = self.mutation_rate * 100
         self.mutation_flat = int(n * self.mutation_rate)
-        self.generations = 1000
+        self.generations = 500
 
         for i, task in enumerate(bs):
             task['id'] = i
@@ -97,26 +98,24 @@ class GeneticScheduler:
                 _penalty = self.calculate_penalties(task, self.start_time_line)
                 _best_task = (i, _penalty) if _penalty < _best_task[1] else _best_task
             new_seed.append(group[_best_task[0]])
-        # new_population = [self.crossover(randint(0, self.population), randint(0, self.population) for _ in range(self.population)]
-        # print(len(new_population))
         new_population = []
         nsl = len(new_seed)
         _best_penalty = math.inf
+        _best_task = []
         for _ in range(self.population):
             new_task = self.crossover(new_seed[randint(0, nsl-1)], new_seed[randint(0, nsl-1)])
-
-            if randint(0, 100) < self.mutation_rate_percent:
-                tasks_to_swap = (randint(0, self.n-1), randint(0, self.n-1))  # Choose tasks to swap
-                new_task[tasks_to_swap[0]], new_task[tasks_to_swap[1]] = new_task[tasks_to_swap[1]], new_task[tasks_to_swap[0]]  # Mutate schedule
+            for _ in range(int(math.sqrt(self.n))):
+                if randint(0, 100) < self.mutation_rate_percent:
+                    tasks_to_swap = (randint(0, self.n-1), randint(0, self.n-1))
+                    # tasks_to_swap = (randint(0, self.n-1), randint(0, self.n-1))  # Choose tasks to swap
+                    new_task[tasks_to_swap[0]], new_task[tasks_to_swap[1]] = new_task[tasks_to_swap[1]], new_task[tasks_to_swap[0]]  # Mutate schedule
 
             new_population.append(new_task)
             _penalty = self.calculate_penalties(new_task, self.start_time_line)
             _best_penalty = _penalty if _penalty < _best_penalty else _best_penalty
+            _best_task = new_task if _penalty == _best_penalty else _best_task
 
-        # for entity in new_population:
-        #     penalty = self.calculate_penalties(entity, self.start_time_line)
-        #     print(', '.join([str(task['id']) for task in entity]), penalty)
-        print(_best_penalty)
+        print(_best_penalty, ', '.join([str(task['id']) for task in _best_task]))
         return new_population
 
     def get_best(self, population):
@@ -129,6 +128,7 @@ class GeneticScheduler:
 
 
     def run(self):
+        # print("{} chances of mutation per one crossover.".format(int(math.sqrt(self.n))))
         self.create_gen_zero()
         # for entity in self.gen_zero:
         #     penalty = self.calculate_penalties(entity, self.start_time_line)
@@ -138,7 +138,7 @@ class GeneticScheduler:
         for gen in range(self.generations):
             ng = self.create_new_gen(ng, 4)
         best_schedule = self.get_best(ng)
-        return best_schedule, self.calculate_penalties(best_schedule, self.start_time_line)
+        return self.calculate_penalties(best_schedule, self.start_time_line), best_schedule
 
 
 
